@@ -109,7 +109,44 @@ class Point:
 
     def __str__(self):
         return f"{self.label}: {self.height}"
-    
+
+# Menu Functions
+
+## Main
+
+def main_menu_choice(choice):
+    try:
+        menu = menu_options["main_menu"]
+        if choice in menu:
+            action = menu[choice]
+            if action == "Open Matrix Menu":
+                print_menu("matrix_menu", matrix_menu_choice)
+            elif action == "Settings":
+                print_menu("settings_menu", settings_menu_choice, settings_data)
+            elif action == "Calculate Floor Leveling Details":
+                calculate_leveling_marker_heights()
+            elif action == "Save Current Matrix":
+                save_matrix()
+            elif action == "Load Saved Matrix":
+                select_matrix_file()
+            elif action == "Help":
+                main_help()
+            elif action == "About":
+                print_menu("about_menu", lambda x: False)
+                #wait_for_input()
+            elif action == "Exit":
+                return False
+            else:
+                print("Invalid choice, please try again.")
+        elif choice.lower() == 'help':
+            main_help()
+        else:
+            print("Invalid choice, please try again.")
+    except Exception as e:
+        logging.error(f"Error in main_menu_choice: {e}")
+        print(f"Error: {e}")
+    return True
+
 def calculate_leveling_marker_heights():
     if len(matrix) < 2:
         print("You must have at least 2 points to calculate leveling marker heights.")
@@ -228,6 +265,21 @@ def load_matrix(file):
     print_matrix(False)
     wait_for_input()
 
+def main_help():
+    refresh_screen()
+    print_and_dash("\nLevel Calculator Help")
+    print("Open Matrix Menu: Access the matrix input and management menu.")
+    print("Calculate Floor Leveling Details: Calculate the leveling marker heights based on the current matrix.")
+    print("Save Current Matrix: Save the current matrix to a file.")
+    print("Load Saved Matrix: Load a saved matrix from a file.")
+    print("Settings: Change application settings.")
+    print("About: Information about the application and its author.")
+    print("Help: Display this help message (also works in the matrix menu and settings menu).")
+    print("Exit: Exit the application.")
+    wait_for_input()
+
+## Matrix
+
 def delete_points():
     while True:
         refresh_screen()
@@ -249,20 +301,6 @@ def delete_points():
         else:
             print(f"Point {point_label} not found.")
         wait_for_input()
-
-def validate_input(prompt, validation_func, error_message):
-    while True:
-        user_input = input(prompt).strip()
-        if user_input == "":
-            if confirm_escape():
-                return None
-            else:
-                return ""
-        if validation_func(user_input):
-            return user_input
-        else:
-            print(error_message)
-            wait_for_input()
 
 def input_points():
     while True:
@@ -367,69 +405,6 @@ def print_matrix(refresh: bool = False, tab_size: int = 10):
     footer_row = ["delta: "] + [""] + [f"{point}:{matrix[point].target_thickness}{current_variables['height_unit']}" for point in point_labels]
     print("\t".join(footer_row).expandtabs(tab_size))
 
-def save_variable_changes():
-    current_variables.update(temp_variables)
-    try:
-        with open("variables.txt", "w") as f:
-            for key in current_variables:
-                f.write(f"{key}={current_variables[key]}\n")
-        logging.info("Current variables saved successfully.")
-    except Exception as e:
-        logging.error(f"Failed to save current variables: {e}")
-        print(f"Failed to save current variables: {e}")
-    
-def restore_default_settings():
-    current_variables.update(default_variables)
-    temp_variables.update(current_variables)
-    print("Default settings restored.")
-    wait_for_input()
-
-def main_menu_choice(choice):
-    try:
-        menu = menu_options["main_menu"]
-        if choice in menu:
-            action = menu[choice]
-            if action == "Open Matrix Menu":
-                print_menu("matrix_menu", matrix_menu_choice)
-            elif action == "Settings":
-                print_menu("settings_menu", settings_menu_choice, settings_data)
-            elif action == "Calculate Floor Leveling Details":
-                calculate_leveling_marker_heights()
-            elif action == "Save Current Matrix":
-                save_matrix()
-            elif action == "Load Saved Matrix":
-                select_matrix_file()
-            elif action == "Help":
-                main_help()
-            elif action == "About":
-                print_menu("about_menu", lambda x: False)
-                #wait_for_input()
-            elif action == "Exit":
-                return False
-            else:
-                print("Invalid choice, please try again.")
-        elif choice.lower() == 'help':
-            main_help()
-        else:
-            print("Invalid choice, please try again.")
-    except Exception as e:
-        logging.error(f"Error in main_menu_choice: {e}")
-        print(f"Error: {e}")
-    return True
-
-def main_help():
-    refresh_screen()
-    print_and_dash("\nLevel Calculator Help")
-    print("Open Matrix Menu: Access the matrix input and management menu.")
-    print("Calculate Floor Leveling Details: Calculate the leveling marker heights based on the current matrix.")
-    print("Save Current Matrix: Save the current matrix to a file.")
-    print("Load Saved Matrix: Load a saved matrix from a file.")
-    print("Settings: Change application settings.")
-    print("About: Information about the application and its author.")
-    print("Help: Display this help message (also works in the matrix menu and settings menu).")
-    print("Exit: Exit the application.")
-    wait_for_input()
-
 def matrix_menu_choice(choice):
     try:
         menu = menu_options["matrix_menu"]
@@ -464,6 +439,26 @@ def matrix_help():
     print("Show Current Matrix: Show the current matrix of points and distances.")
     print("Delete Points: Delete points from the matrix.")
     print("Back to Main Menu: Return to the main menu.")
+    wait_for_input()
+
+
+## Settings
+
+def save_variable_changes():
+    current_variables.update(temp_variables)
+    try:
+        with open("variables.txt", "w") as f:
+            for key in current_variables:
+                f.write(f"{key}={current_variables[key]}\n")
+        logging.info("Current variables saved successfully.")
+    except Exception as e:
+        logging.error(f"Failed to save current variables: {e}")
+        print(f"Failed to save current variables: {e}")
+    
+def restore_default_settings():
+    current_variables.update(default_variables)
+    temp_variables.update(current_variables)
+    print("Default settings restored.")
     wait_for_input()
 
 def set_max_slope():
@@ -578,6 +573,8 @@ def settings_help():
     print("Back to Main Menu: Return to the main menu.")
     wait_for_input()
 
+# Generic Menu Functions
+
 def print_menu(menu_name, menu_callback, menu_data_function=None):
     stay_in_current_menu = True
     while stay_in_current_menu:
@@ -597,7 +594,6 @@ def print_menu(menu_name, menu_callback, menu_data_function=None):
         choice = input("Enter choice: ").strip()
         stay_in_current_menu = menu_callback(choice)
 
-
 def refresh_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -609,12 +605,28 @@ def wait_for_input():
     input("Press Enter to continue...")
 
 def confirm_escape():
-    print("Hit enter again to confirm exiting the menu, or type anything else to remain")
+    print("Hit enter again to confirm escape, or type anything else to remain")
     key = msvcrt.getch()
     if key == b'\r':  # Enter key
         return True
     else:
         return False
+    
+def validate_input(prompt, validation_func, error_message):
+    while True:
+        user_input = input(prompt).strip()
+        if user_input == "":
+            if confirm_escape():
+                return None
+            else:
+                return ""
+        if validation_func(user_input):
+            return user_input
+        else:
+            print(error_message)
+            wait_for_input()
+
+# Main program
 
 if __name__ == "__main__":
     load_variables()
