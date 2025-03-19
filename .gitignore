@@ -1,3 +1,7 @@
 variables.txt
 saves/*
 floor_level_calculator.log
+dist/*
+build/*
+src/*.pyc
+src/__pycache__/
