@@ -1,4 +1,5 @@
 variables.txt
+variables.json
 saves/*
 floor_level_calculator.log
 dist/*
