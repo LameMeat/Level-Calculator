@@ -6,9 +6,7 @@ class FileManager:
     def __init__(self, console: Console):
         self.console = console
 
-    def prompt_for_file_choice(self, directory, refresh: bool = False):
-        if refresh:
-            self.console.refresh_screen()
+    def prompt_for_file_choice(self, directory):
         files = self.list_files(directory)
         print(files)
         return self.console.navigate_menu(files, "Load File")
@@ -66,6 +64,7 @@ class FileManager:
 
     @staticmethod
     def ensure_directory_exists(directory):
+        directory = os.path.abspath(directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
 

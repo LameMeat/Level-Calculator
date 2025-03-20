@@ -40,7 +40,8 @@ class Matrix:
         Console.wait_for_input()
 
     def save_matrix(self):
-        save_directory = self.config.current_variables["save_directory"]
+        save_directory = self.config.current_variables["save_directory"]["value"]
+        print(f"Current save directory: {save_directory}")
         FileManager.ensure_directory_exists(save_directory)
         # save the current matrix to a file
         time_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -119,7 +120,7 @@ class Matrix:
 
     def print_points(self, refresh: bool = False):
         if refresh:
-            Console.refresh_screen()
+            Console.clear_screen()
         Console.print_and_dash("Current Points")
         for point in self.matrix.values():
             if point == list(self.matrix.values())[-1]:
@@ -129,7 +130,7 @@ class Matrix:
 
     def print_distances(self, refresh: bool = False):
         if refresh:
-            Console.refresh_screen()
+            Console.clear_screen()
         Console.print_and_dash("Current Distances")
         for point in self.matrix.values():
             for distance in point.distances.values():
@@ -139,7 +140,7 @@ class Matrix:
         if len(self.matrix) == 0:
             print("No points in the matrix.")
         if refresh:
-            Console.refresh_screen()
+            Console.clear_screen()
         Console.print_and_dash("Current Matrix")
         
         point_labels = list(self.matrix.keys())
@@ -160,7 +161,7 @@ class Matrix:
 
     def delete_points(self):
         while True:
-            Console.refresh_screen()
+            Console.clear_screen()
             Console.print_and_dash("Delete Points")
             print("Enter the point label to delete, then hit enter.")
             Console.print_and_dash("Hit enter without entering a point to finish deleting points.")
@@ -182,7 +183,7 @@ class Matrix:
 
     def input_points(self):
         while True:
-            Console.refresh_screen()
+            Console.clear_screen()
             Console.print_and_dash("Input Points")
             print("Enter the point label, then hit enter.")
             print("You will then be prompted for the height of the point.")
@@ -209,7 +210,7 @@ class Matrix:
                 print("You must have at least 2 points to enter a distance.")
                 Console.wait_for_input()
                 break
-            Console.refresh_screen()
+            Console.clear_screen()
             Console.print_and_dash("Input Distances")
             print("Enter the first point, then the second point, then the distance between them.")
             print("You will then be prompted for the distance.")

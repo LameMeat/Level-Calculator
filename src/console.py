@@ -6,8 +6,15 @@ class Console:
     def __init__(self, action_map, shared_state: SharedState):
         self.action_map = action_map
         self.shared_state = shared_state
+        self.current_menu_options = None
+        self.current_menu_name = None
+        self.current_conditions = None
 
     def navigate_menu(self, menu_options, menu_name=None, conditions=None):
+        self.current_menu_options = menu_options
+        self.current_menu_name = menu_name
+        self.current_conditions = conditions
+
         if isinstance(menu_options, list):
             items = menu_options
             title = menu_name if menu_name else "Menu"
@@ -16,48 +23,60 @@ class Console:
             if conditions is None:
                 conditions = {}
             conditions.update({"variables_changed": self.shared_state.variables_changed})
-            items = [item['text'] for item in menu['items'] if self.evaluate_conditions(item.get('conditions'), conditions)]
+            items = [item for item in menu['items'] if self.evaluate_conditions(item.get('conditions'), conditions)]
             title = menu['title']
         
         index = 0
 
         def print_items():
-            self.refresh_screen()
+            self.clear_screen()
             self.print_and_dash(title)
-            print(f"shared_state.variables_changed: {self.shared_state.variables_changed}")
             for i, item in enumerate(items):
+                item_text = item['text']
+                if self.shared_state.show_help and 'help_text' in item:
+                    item_text += f" : {item['help_text']}"
                 if i == index:
-                    print(f"> {item}")
+                    print(f"> {item_text}")
                 else:
-                    print(f"  {item}")
+                    print(f"  {item_text}")
 
         def update_items():
             for i, item in enumerate(items):
+                item_text = item['text']
+                if self.shared_state.show_help and 'help_text' in item:
+                    item_text += f" : {item['help_text']}"
                 if i == index:
-                    print(f"\033[{i+5}H> {item}")  # Adjusted cursor position
+                    print(f"\033[{i+4}H> {item_text}")  # Adjusted cursor position
                 else:
-                    print(f"\033[{i+5}H  {item}")  # Adjusted cursor position
+                    print(f"\033[{i+4}H  {item_text}")  # Adjusted cursor position
             print("\033[0J", end='')  # Clear from cursor to end of screen
+
+        def move_cursor_up():
+            nonlocal index
+            while index > 0:
+                index -= 1
+                if items[index]['action'] != 'none':
+                    break
+
+        def move_cursor_down():
+            nonlocal index
+            while index < len(items) - 1:
+                index += 1
+                if items[index]['action'] != 'none':
+                    break
 
         print_items()
         while True:
             key = self.get_key_input()
             if key in ['\xe0H', '\x1b[A', 'w']:  # Up arrow or 'w' key
-                if index > 0:
-                    index -= 1
-                    update_items()
+                move_cursor_up()
+                update_items()
             elif key in ['\xe0P', '\x1b[B', 's']:  # Down arrow or 's' key
-                if index < len(items) - 1:
-                    index += 1
-                    update_items()
+                move_cursor_down()
+                update_items()
             elif key == '\r':  # Enter
-                if isinstance(menu_options, list):
-                    selected_item = items[index]
-                    print(f"Selected: {selected_item}")
-                    self.wait_for_input()
-                    return selected_item
-                else:
-                    selected_item = menu['items'][index]
+                selected_item = items[index]
+                if selected_item['action'] != 'none':
                     action = selected_item['action']
                     if action in self.action_map:
                         result = self.action_map[action]()
@@ -68,11 +87,16 @@ class Console:
                         self.wait_for_input()
                     print_items()
             elif key == '\x03':  # Ctrl+C
+                self.exit_program()
+            elif key == '\x1b':  # ESC
                 return ''
+
+    def rerender(self):
+        if self.current_menu_options is not None:
+            self.navigate_menu(self.current_menu_options, self.current_menu_name, self.current_conditions)
 
     @staticmethod
     def evaluate_conditions(item_conditions, conditions):
-        print(item_conditions, conditions)
         if not item_conditions or not conditions:
             return True
         if conditions.get(item_conditions['condition']) != item_conditions['value']:
@@ -104,7 +128,7 @@ class Console:
                 Console.wait_for_input()
 
     @staticmethod
-    def refresh_screen():
+    def clear_screen():
         os.system('cls' if os.name == 'nt' else 'clear')
 
     @staticmethod

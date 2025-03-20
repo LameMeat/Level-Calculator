@@ -22,6 +22,9 @@ console = console_module.Console(action_map={}, shared_state=shared_state)
 file_manager = FileManager(console)
 matrix = matrix_module.Matrix(config, file_manager)
 
+def toggle_help():
+    shared_state.show_help = not shared_state.show_help
+
 # Action mappings
 action_map = {
     "open_matrix_menu": lambda: console.navigate_menu(menu_options, "matrix_menu"),
@@ -30,7 +33,7 @@ action_map = {
     "load_saved_matrix": matrix.load_saved_matrix,
     "settings": lambda: console.navigate_menu(menu_options, "settings_menu"),
     "about": lambda: console.navigate_menu(menu_options, "about"),
-    "help": lambda: console.navigate_menu(menu_options, "help"),
+    "help": lambda: (toggle_help(), console.rerender()),
     "exit": lambda: console.exit_program(),
     "input_points": matrix.input_points,
     "input_distances": matrix.input_distances,
