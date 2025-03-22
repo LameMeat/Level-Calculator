@@ -6,20 +6,20 @@ class Console:
     def __init__(self, action_map, shared_state: SharedState):
         self.action_map = action_map
         self.shared_state = shared_state
-        self.current_menu_options = None
+        self.current_menu_choices = None
         self.current_menu_name = None
         self.current_conditions = None
 
-    def navigate_menu(self, menu_options, menu_name=None, conditions=None):
-        self.current_menu_options = menu_options
+    def navigate_menu(self, menu_choices, menu_name=None, conditions=None, return_choice=False):
+        self.current_menu_choices = menu_choices
         self.current_menu_name = menu_name
         self.current_conditions = conditions
 
-        if isinstance(menu_options, list):
-            items = menu_options
+        if isinstance(menu_choices, list):
+            items = menu_choices
             title = menu_name if menu_name else "Menu"
         else:
-            menu = menu_options[menu_name]
+            menu = menu_choices[menu_name]
             if conditions is None:
                 conditions = {}
             conditions.update({"variables_changed": self.shared_state.variables_changed})
@@ -41,14 +41,16 @@ class Console:
                     print(f"  {item_text}")
 
         def update_items():
+            terminal_width = os.get_terminal_size().columns
             for i, item in enumerate(items):
                 item_text = item['text']
                 if self.shared_state.show_help and 'help_text' in item:
                     item_text += f" : {item['help_text']}"
+                row_offset = (len(item_text) // terminal_width) + 1  # Calculate row offset dynamically
                 if i == index:
-                    print(f"\033[{i+4}H> {item_text}")  # Adjusted cursor position
+                    print(f"\033[{i * row_offset + 4}H> {item_text}")  # Adjusted cursor position
                 else:
-                    print(f"\033[{i+4}H  {item_text}")  # Adjusted cursor position
+                    print(f"\033[{i * row_offset + 4}H  {item_text}")  # Adjusted cursor position
             print("\033[0J", end='')  # Clear from cursor to end of screen
 
         def move_cursor_up():
@@ -76,6 +78,9 @@ class Console:
                 update_items()
             elif key == '\r':  # Enter
                 selected_item = items[index]
+                if 'action' in selected_item:
+                    if return_choice:
+                        return selected_item
                 if selected_item['action'] != 'none':
                     action = selected_item['action']
                     if action in self.action_map:
@@ -83,6 +88,7 @@ class Console:
                         if result is False:
                             break
                     else:
+                        print(f"Action '{action}' not found.")
                         print("Invalid choice, please try again.")
                         self.wait_for_input()
                     print_items()
@@ -92,8 +98,8 @@ class Console:
                 return ''
 
     def rerender(self):
-        if self.current_menu_options is not None:
-            self.navigate_menu(self.current_menu_options, self.current_menu_name, self.current_conditions)
+        if self.current_menu_choices is not None:
+            self.navigate_menu(self.current_menu_choices, self.current_menu_name, self.current_conditions)
 
     @staticmethod
     def evaluate_conditions(item_conditions, conditions):

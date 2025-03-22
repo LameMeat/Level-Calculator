@@ -11,7 +11,7 @@ logging.basicConfig(filename='floor_level_calculator.log', level=logging.DEBUG,
 
 # Load menu options from JSON file
 default_variables = FileManager.load_json('default_variables.json')
-menu_options = FileManager.load_json('menu.json')
+menu_choices = FileManager.load_json('menu.json')
 
 # Initialize shared state
 shared_state = SharedState()
@@ -27,12 +27,13 @@ def toggle_help():
 
 # Action mappings
 action_map = {
-    "open_matrix_menu": lambda: console.navigate_menu(menu_options, "matrix_menu"),
-    "calculate_floor_leveling_details": matrix.calculate_leveling_marker_heights,
+    "open_matrix_menu": lambda: console.navigate_menu(menu_choices, "matrix_menu"),
+    "calculate_floor_leveling_heights": matrix.calculate_leveling_marker_heights,
+    "calculate_floor_leveling_volume": matrix.calculate_leveling_volume,
     "save_current_matrix": matrix.save_matrix,
     "load_saved_matrix": matrix.load_saved_matrix,
-    "settings": lambda: console.navigate_menu(menu_options, "settings_menu"),
-    "about": lambda: console.navigate_menu(menu_options, "about"),
+    "settings": lambda: console.navigate_menu(menu_choices, "settings_menu"),
+    "about": lambda: console.navigate_menu(menu_choices, "about"),
     "help": lambda: (toggle_help(), console.rerender()),
     "exit": lambda: console.exit_program(),
     "input_points": matrix.input_points,
@@ -44,14 +45,25 @@ action_map = {
     "change_max_slope": lambda: config.modify_variable("max_slope"),
     "change_save_directory": lambda: config.modify_variable("save_directory"),
     "restore_default_settings": config.restore_default_settings,
-    "back_to_main_menu": lambda: console.navigate_menu(menu_options, "main_menu"),
-    "save_variable_changes": lambda: (config.save_variable_changes(), console.navigate_menu(menu_options, "main_menu")),
-    "discard_variable_changes": lambda: (config.discard_variable_changes(), console.navigate_menu(menu_options, "main_menu")),
+    "back_to_main_menu": lambda: console.navigate_menu(menu_choices, "main_menu"),
+    "save_variable_changes": lambda: (config.save_variable_changes(), console.navigate_menu(menu_choices, "main_menu")),
+    "discard_variable_changes": lambda: (config.discard_variable_changes(), console.navigate_menu(menu_choices, "main_menu")),
 }
 
 # Update Console with action_map
 console.action_map = action_map
 
+def main_loop():
+    current_action = lambda: console.navigate_menu(menu_choices, "main_menu")
+    ############### Main Loop ###############
+    while True:
+        try:
+            current_action = current_action()
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            print(f"An error occurred: {e}")
+            console.wait_for_input()
+
 # Main program
 if __name__ == "__main__":
-    console.navigate_menu(menu_options, "main_menu")
+    console.navigate_menu(menu_choices, "main_menu")
