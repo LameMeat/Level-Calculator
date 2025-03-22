@@ -1,5 +1,7 @@
 import os
 import logging
+import math
+import numpy as np
 from datetime import datetime
 from .console import Console
 from .config import Config
@@ -11,6 +13,104 @@ class Matrix:
         self.config = config
         self.file_manager = file_manager
         self.matrix = {}
+
+    def calculate_leveling_volume(self):
+        if len(self.matrix) < 3:
+            print("You must have at least 3 points to calculate leveling volume.")
+            Console.wait_for_input()
+            return
+        # check if all points have a target thickness
+        for point in self.matrix.values():
+            if point.target_thickness == 'X':
+                point.target_thickness = 0.0
+        triangle_names = [] # list of unique triangle names, i.e. ab-ac-bc
+        total_volume = 0.0
+        for point1 in self.matrix.values():
+            for dist1 in point1.distances.values():
+                point2 = self.matrix[dist1.point2]
+                for dist2 in point2.distances.values():
+                    point3 = self.matrix[dist2.point2]
+                    # make sure each point is unique
+                    if point1 == point2 or point1 == point3 or point2 == point3:
+                        continue
+                    # make sure point 3 is contiguous with point 1
+                    if point3 not in point1.distances.values():
+                        continue
+                    triangle_name = f"{point1.label}-{point2.label}-{point3.label}"
+                    if triangle_name in triangle_names:
+                        continue
+                    triangle_names.append(triangle_name)
+                    # calculate the volume of the prism
+                    volume = self.calculate_prism_volume(point1, point2, point3)
+                    total_volume += volume
+                    print(f"Triangle {triangle_name} volume: {volume}")
+        print(f"Total leveling volume: {total_volume}")
+        Console.wait_for_input()
+
+    def calculate_prism_volume(self, point1, point2, point3):
+        # calculate the volume of the prism using the heights and target thicknesses of the points to determine the vertices of 3 non-overlapping tetrahedrons
+
+        prism = {
+            'a' : point1.height,
+            'b' : point2.height,
+            'c' : point3.height,
+            'd' : point1.target_thickness,
+            'e' : point2.target_thickness,
+            'f' : point3.target_thickness,
+            'ab' : point1.distances[point2.label].distance,
+            'ac' : point1.distances[point3.label].distance,
+            'bc' : point2.distances[point3.label].distance
+        }
+
+        return self.prism_volume(prism)
+
+    def heron_area(a, b, c):
+        s = (a + b + c) / 2  # Semi-perimeter
+        return math.sqrt(s * (s - a) * (s - b) * (s - c))
+
+    def prism_volume(prism):
+        # Extract base heights
+        a, b, c = prism['a'], prism['b'], prism['c']
+        d, e, f = prism['d'], prism['e'], prism['f']
+        
+        # Base triangle side lengths
+        ab, ac, bc = prism['ab'], prism['ac'], prism['bc']
+
+        # Assume 2D coordinates for base triangle using simple planar embedding
+        A = (0, 0, a)  # Place first point at origin
+        B = (ab, 0, b)  # Place second point along x-axis
+        C_x = (ac**2 - bc**2 + ab**2) / (2 * ab)  # Compute third point's x-coordinate
+        C_y = math.sqrt(max(0, ac**2 - C_x**2))   # Compute y-coordinate
+        C = (C_x, C_y, c)  # Third point in 3D space
+
+        # Compute top points with offsets
+        A_top = (0, 0, a + d)
+        B_top = (ab, 0, b + e)
+        C_top = (C_x, C_y, c + f)
+
+        # Tetrahedral decomposition (three tetrahedra inside the prism)
+        V1 = tetrahedron_volume(A, B, C, A_top)
+        V2 = tetrahedron_volume(B, C, A_top, B_top)
+        V3 = tetrahedron_volume(C, A_top, B_top, C_top)
+
+        # Total volume is the sum of the three tetrahedra
+        return V1 + V2 + V3
+    
+    def tetrahedron_volume(p1, p2, p3, p4):
+        A = np.array(p1)
+        B = np.array(p2)
+        C = np.array(p3)
+        D = np.array(p4)
+
+        # Compute vectors
+        AB = B - A
+        AC = C - A
+        AD = D - A
+
+        # Compute scalar triple product (|AB x AC . AD| / 6)
+        cross_product = np.cross(AB, AC)
+        volume = abs(np.dot(cross_product, AD)) / 6.0
+        return volume
 
     def calculate_leveling_marker_heights(self):
         if len(self.matrix) < 2:
@@ -73,16 +173,13 @@ class Matrix:
             Console.wait_for_input()
             return
         print("Select a saved matrix file:")
-        choice = FileManager.prompt_for_file_choice(self.file_manager, save_directory, True)
+        choice = FileManager.prompt_for_file_choice(self.file_manager, save_directory)
         if choice == '':
             if Console.confirm_escape():
                 print("Exiting load menu.")
             return
         else:
-            if isinstance(choice, int):
-                file_name = files[choice - 1]
-            else:
-                file_name = choice
+            file_name = choice['text']
             file_path = os.path.join(save_directory, file_name)
             content = FileManager.load_file(file_path)
             if content is None:
