@@ -9,7 +9,7 @@ class FileManager:
     def prompt_for_file_choice(self, directory):
         files = self.list_files(directory)
         print(files)
-        return self.console.navigate_menu(files, "Load File")
+        return self.console.navigate_menu(files, "Load File", return_choice=True)
 
     @staticmethod
     def load_file(file_path):
@@ -55,9 +55,17 @@ class FileManager:
             print(f"Directory {directory} not found.")
             return []
         try:
-            if extension:
-                return [f for f in os.listdir(directory) if f.endswith(extension)]
-            return os.listdir(directory)
+            files = []
+            for f in os.listdir(directory):
+                if extension and not f.endswith(extension):
+                    continue
+                files.append({
+                    "order": len(files) + 1,
+                    "text": f,
+                    "action": f"select_file({f})",
+                    "help_text": f"Select the file {f}"
+                })
+            return files
         except Exception as e:
             print(f"Error listing files in directory {directory}: {e}")
             return []
