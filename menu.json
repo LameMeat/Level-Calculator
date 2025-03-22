@@ -5,12 +5,18 @@
             {
                 "order": 1,
                 "text": "Open Matrix Menu",
-                "action": "open_matrix_menu"
+                "action": "open_matrix_menu",
+                "help_text": "Access the matrix input and management menu."
             },
             {
                 "order": 2,
-                "text": "Calculate Floor Leveling Details",
-                "action": "calculate_floor_leveling_details"
+                "text": "Calculate Floor Leveling Heights",
+                "action": "calculate_floor_leveling_heights"
+            },
+            {
+                "order": 2.5,
+                "text": "Calculate Floor Leveling Volume",
+                "action": "calculate_floor_leveling_volume"
             },
             {
                 "order": 3,
