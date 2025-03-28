@@ -1,0 +1,240 @@
+{
+    "main_menu": {
+        "title": "Floor Leveling Calculator",
+        "items": [
+            {
+                "order": 1,
+                "text": "Open Matrix Menu",
+                "action": "open_matrix_menu",
+                "help_text": "Access the matrix input and management menu."
+            },
+            {
+                "order": 2,
+                "text": "Calculate Floor Leveling Heights",
+                "action": "calculate_floor_leveling_heights"
+            },
+            {
+                "order": 2.5,
+                "text": "Calculate Floor Leveling Volume",
+                "action": "calculate_floor_leveling_volume"
+            },
+            {
+                "order": 3,
+                "text": "Save Current Matrix",
+                "action": "save_current_matrix"
+            },
+            {
+                "order": 4,
+                "text": "Load Saved Matrix",
+                "action": "load_saved_matrix"
+            },
+            {
+                "order": 5,
+                "text": "Settings",
+                "action": "settings"
+            },
+            {
+                "order": 6,
+                "text": "About",
+                "action": "about"
+            },
+            {
+                "order": 7,
+                "text": "Help",
+                "action": "help"
+            },
+            {
+                "order": 9,
+                "text": "Exit",
+                "action": "exit"
+            }
+        ]
+    },
+    "matrix_menu": {
+        "title": "Matrix Input Menu",
+        "items": [
+            {
+                "order": 1,
+                "text": "Input Points",
+                "action": "input_points"
+            },
+            {
+                "order": 2,
+                "text": "Input Distances",
+                "action": "input_distances"
+            },
+            {
+                "order": 3,
+                "text": "Show Current Matrix",
+                "action": "show_current_matrix"
+            },
+            {
+                "order": 5,
+                "text": "Delete Points",
+                "action": "delete_points"
+            },
+            {
+                "order": 9,
+                "text": "Back to Main Menu",
+                "action": "back_to_main_menu"
+            }
+        ]
+    },
+    "settings_menu": {
+        "title": "Settings Menu",
+        "items": [
+            {
+                "order": 1,
+                "text": "Change Height Unit",
+                "action": "change_height_unit"
+            },
+            {
+                "order": 2,
+                "text": "Change Distance Unit",
+                "action": "change_distance_unit"
+            },
+            {
+                "order": 3,
+                "text": "Change Max Slope",
+                "action": "change_max_slope"
+            },
+            {
+                "order": 4,
+                "text": "Change Save Directory",
+                "action": "change_save_directory"
+            },
+            {
+                "order": 7,
+                "text": "Restore default settings",
+                "action": "restore_default_settings"
+            },
+            {
+                "order": 8,
+                "text": "Help",
+                "action": "help"
+            },
+            {
+                "order": 9,
+                "text": "Save & Exit",
+                "action": "save_variable_changes",
+                "conditions": {
+                    "condition": "variables_changed",
+                    "value": true
+                }
+            },
+            {
+                "order": 9,
+                "text": "Back to Main Menu",
+                "action": "back_to_main_menu",
+                "conditions": {
+                    "condition": "variables_changed",
+                    "value": false
+                }
+            },
+            {
+                "order": 10,
+                "text": "Exit Without Saving",
+                "action": "discard_variable_changes",
+                "conditions": {
+                    "condition": "variables_changed",
+                    "value": true
+                }
+            }
+        ]
+    },
+    "about": {
+        "title": "About",
+        "items": [
+            {
+                "order": 10,
+                "text": "Author: Matthew Eater",
+                "action": "none"
+            },
+            {
+                "order": 20,
+                "text": "I made this one day when I was working on a floor leveling project and thought it would be nice to have a calculator to help me out.",
+                "action": "none"
+            },
+            {
+                "order": 30,
+                "text": "The basic principal is that you use a laser level to determine the relative heights of the high and low spots in the floor, measure the distances between those points, and then input that data into this calculator to get the thickness of the leveling compound to use at each point.",
+                "action": "none"
+            },
+            {
+                "order": 40,
+                "text": "Eventually I want to add a feature that calculates the volume of compound required, but I think this will require either a more complex system for inputting points via a coordinate system, or it will require the user to only take measures that create triangles so that the topology of the floor can be calculated trigonomically.",
+                "action": "none"
+            },
+            {
+                "order": 50,
+                "text": "This is a work in progress, and I welcome any feedback or suggestions for improvement.",
+                "action": "none"
+            },
+            {
+                "order": 60,
+                "text": "Thanks for using my calculator!",
+                "action": "none"
+            },
+            {
+                "order": 70,
+                "text": "...",
+                "action": "none"
+            },
+            {
+                "order": 80,
+                "text": "This isn't a real menu, so just hit enter to return to the main menu.",
+                "action": "back_to_main_menu"
+            }
+        ]
+    },
+    "help": {
+        "title": "Level Calculator Help",
+        "items": [
+            {
+                "order": 1,
+                "text": "Open Matrix Menu: Access the matrix input and management menu.",
+                "action": "none"
+            },
+            {
+                "order": 2,
+                "text": "Calculate Floor Leveling Details: Calculate the leveling marker heights based on the current matrix.",
+                "action": "none"
+            },
+            {
+                "order": 3,
+                "text": "Save Current Matrix: Save the current matrix to a file.",
+                "action": "none"
+            },
+            {
+                "order": 4,
+                "text": "Load Saved Matrix: Load a saved matrix from a file.",
+                "action": "none"
+            },
+            {
+                "order": 5,
+                "text": "Settings: Change application settings.",
+                "action": "none"
+            },
+            {
+                "order": 6,
+                "text": "About: Information about the application and its author.",
+                "action": "none"
+            },
+            {
+                "order": 7,
+                "text": "Help: Display this help message (also works in the matrix menu and settings menu).",
+                "action": "none"
+            },
+            {
+                "order": 8,
+                "text": "Exit: Exit the application.",
+                "action": "none"
+            },
+            {
+                "order": 9,
+                "text": "Back to Main Menu",
+                "action": "back_to_main_menu"
+            }
+        ]
+    }
+}
