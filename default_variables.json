@@ -1,0 +1,22 @@
+{
+    "height_unit": {
+        "value": "millimeters",
+        "type": "string",
+        "nullable": false
+    },
+    "distance_unit": {
+        "value": "inch",
+        "type": "string",
+        "nullable": false
+    },
+    "max_slope": {
+        "value": 0.044,
+        "type": "number",
+        "nullable": false
+    },
+    "save_directory": {
+        "value": "saves",
+        "type": "dir",
+        "nullable": false
+    }
+}

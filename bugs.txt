@@ -1,0 +1,2 @@
+Delete points not working
+If you abort the save operation you still get a message implying it saved correctly
